@@ -1,0 +1,4 @@
+RewriteEngine On
+RewriteRule api/orders/ api.php?endpoint=orders [L,NC]
+RewriteRule api/orderStatus/ api.php?endpoint=orderStatus [L,NC]
+RewriteRule api/paymentMethods/ api.php?endpoint=paymentMethods [L,NC]
