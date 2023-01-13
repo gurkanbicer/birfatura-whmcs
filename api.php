@@ -5,7 +5,6 @@ require_once '../init.php';
 define("CONTENT_TYPE", "application/json");
 define("CHARSET", "UTF-8");
 define("TOKEN", "HASH");
-define("STORE", "whmcsmagaza.com");
 define("CURRENCY", "TRY");
 define("CURRENCY_RATE", 1);
 define("ORDER_PREFIX", "INV-");
@@ -147,10 +146,11 @@ switch ($endpoint) {
         $invoiceStartDateTime = date('Y-m-d H:i:s', strtotime($request['startDateTime']));
         $invoiceEndDateTime = date('Y-m-d H:i:s', strtotime($request['endDateTime']));
 
-        # geçici olarak eklendi sonra silinecek
-        if ($invoiceStartDateTime < '2023-01-02 00:00:00') {
+        # Belirli tarihten önceki faturaların görünmemesini ve fatura kesilmemesini istiyorsanız bu seçeneği aktif edin.
+        # Whmcs entegrasyondan, Özel Entegrasyona geçerken kullandım.
+        /*if ($invoiceStartDateTime < '2023-01-02 00:00:00') {
             $invoiceStartDateTime = '2023-01-02 00:00:00';
-        }
+        }*/
 
         $invoiceStatus = status();
 
