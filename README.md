@@ -21,3 +21,5 @@ Birfatura.com kullanan WHMCS mağazaları için özel entegrasyon API.
 #### Ek Not
 
 _Birfatura.com üzerindeki WHMCS entegrasyonu BETA aşamasındadır ve sadece yeni siparişleri algılamaktadır. Yenileme faturalarını algılamamaktadır. Hazırlamış olduğum bu API ay içerinde ödenen tüm faturaları düzgünce eksiksiz kesilmesini sağlar. Siz yine de özel entegrasyonu aktif edip, faturaları resmileştirmeden önce Postman ile API yanıtlarını kontrol ediniz._
+
+Birfatura API dökümanına göre https://app.swaggerhub.com/apis-docs/birfatura/orders hazırlanmıştır.
