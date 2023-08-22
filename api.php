@@ -105,7 +105,7 @@ function paymentMethod($gateway) {
     }
 }
 
-function kdv($action, $amount, $rate = 18) {
+function kdv($action, $amount, $rate = 20) {
     if ($action == "add") {
         $data = (float)$amount * (1 + $rate / 100);
         return number_format($data, '2', '.', '');
@@ -175,6 +175,12 @@ switch ($endpoint) {
                 $invoiceTotal = $invoice->total;
                 $invoiceSubTotal = $invoice->subtotal;
 
+                if ($invoice->datepaid < "2023-07-10 00:00:00") {
+                    $kdvRate = 18;
+                } else {
+                    $kdvRate = 20;
+                }
+
                 $products = [];
                 $productsTotal = 0.00;
                 $transactionTotal = 0.00;
@@ -206,7 +212,7 @@ switch ($endpoint) {
                 # fazla ödeme
                 if ($transactionTotal > $invoice->total) {
                     $overPaid = $transactionTotal - $invoice->total;
-                    $overPaidTaxExcluded = kdv("remove", $overPaid);
+                    $overPaidTaxExcluded = kdv("remove", $overPaid, $kdvRate);
                 }
 
                 # ürünler
@@ -220,9 +226,9 @@ switch ($endpoint) {
                             'ProductName' => 'Ön Ödeme',
                             'ProductQuantityType' => 'Adet',
                             'ProductQuantity' => 1,
-                            'VatRate' => intval($invoice->taxrate),
+                            'VatRate' => $kdvRate,
                             'ProductUnitPriceTaxIncluding' => moneyFormat($invoiceItem->amount),
-                            'ProductUnitPriceTaxExcluding' => moneyFormat(kdv("remove", $invoiceItem->amount)),
+                            'ProductUnitPriceTaxExcluding' => moneyFormat(kdv("remove", $invoiceItem->amount, $kdvRate)),
                         ];
                         
                         $productsTotal += moneyFormat($invoiceItem->amount);
@@ -233,12 +239,12 @@ switch ($endpoint) {
                             'ProductName' => PRODUCT_NAME_PREFIX . trim($descriptionExpl[0]),
                             'ProductQuantityType' => 'Adet',
                             'ProductQuantity' => 1,
-                            'VatRate' => intval($invoice->taxrate),
-                            'ProductUnitPriceTaxIncluding' => moneyFormat(kdv("add", $invoiceItem->amount)),
+                            'VatRate' => $kdvRate,
+                            'ProductUnitPriceTaxIncluding' => moneyFormat(kdv("add", $invoiceItem->amount, $kdvRate)),
                             'ProductUnitPriceTaxExcluding' => moneyFormat($invoiceItem->amount),
                         ];
                         
-                        $productsTotal += moneyFormat(kdv("add", $invoiceItem->amount));
+                        $productsTotal += moneyFormat(kdv("add", $invoiceItem->amount, $kdvRate));
                     }
                 }
                 
@@ -250,7 +256,7 @@ switch ($endpoint) {
                         'ProductName' => 'Ön Ödeme',
                         'ProductQuantityType' => 'Adet',
                         'ProductQuantity' => 1,
-                        'VatRate' => intval($invoice->taxrate),
+                        'VatRate' => intval($kdvRate),
                         'ProductUnitPriceTaxIncluding' => moneyFormat($overPaid),
                         'ProductUnitPriceTaxExcluding' => moneyFormat($overPaidTaxExcluded),
                     ];
@@ -280,11 +286,11 @@ switch ($endpoint) {
                     'PaymentType' => paymentMethod($invoice->paymentmethod),
                     'Currency' => CURRENCY,
                     'CurrencyRate' => CURRENCY_RATE,
-                    'TotalPaidTaxExcluding' => moneyFormat(kdv('remove', $transactionTotal)),
+                    'TotalPaidTaxExcluding' => moneyFormat(kdv('remove', $transactionTotal, $kdvRate)),
                     'TotalPaidTaxIncluding' => moneyFormat($transactionTotal),
-                    'ProductsTotalTaxExcluding' => moneyFormat(kdv('remove', $productsTotal)),
+                    'ProductsTotalTaxExcluding' => moneyFormat(kdv('remove', $productsTotal, $kdvRate)),
                     'ProductsTotalTaxIncluding' => moneyFormat($productsTotal),
-                    'DiscountTotalTaxExcluding' => moneyFormat(kdv('remove', $usedCredit)),
+                    'DiscountTotalTaxExcluding' => moneyFormat(kdv('remove', $usedCredit, $kdvRate)),
                     'DiscountTotalTaxIncluding' => moneyFormat($usedCredit),
                     'OrderDetails' => $products,
                 ];
